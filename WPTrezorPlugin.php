@@ -74,51 +74,54 @@ class WPTrezorPlugin {
         load_plugin_textdomain(self::slug, false, dirname(plugin_basename(__FILE__)) . '/lang');
         // Load JavaScript and stylesheets
         // $this->register_scripts_and_styles();
-
-        if ($_GET['trezor_action'] == 'login') {
-            $this->login(
-                filter_input(INPUT_GET, 'public_key'),
-                filter_input(INPUT_GET, 'signature'),
-                filter_input(INPUT_GET, 'version')
-            );
-        }
-
-        if ($_GET['trezor_action'] == 'link') {
-            $psw = filter_input(INPUT_POST, 'psw');
-            $userdata = wp_get_current_user();
-
-            if (wp_check_password($psw, $userdata->user_pass, $userdata->ID)) {
-                $result = $this->save_extra_profile_fields($userdata->ID);
-                echo(json_encode(array(
-                    'result' => $result ? 'success' : 'error',
-                    'message' => $result ? '' : 'Wrong signature',
-                )));
-            } else {
-                echo(json_encode(array(
-                    'result' => 'error',
-                    'message' => 'Wrong password',
-                )));
-            }
-            exit;
-        }
-
-        if ($_GET['trezor_action'] == 'unlink') {
-            $psw = filter_input(INPUT_POST, 'psw');
-            $userdata = wp_get_current_user();
-
-            if (wp_check_password($psw, $userdata->user_pass, $userdata->ID)) {
-                update_user_meta($userdata->ID,'trezor_publickey', '');
-                echo(json_encode(array(
-                    'result' => 'success',
-                )));
-            } else {
-                echo(json_encode(array(
-                    'result' => 'error',
-                    'message' => 'Wrong password',
-                )));
+        
+        if(isset($_GET['trezor_action'])) {
+        
+            if ($_GET['trezor_action'] == 'login') {
+                $this->login(
+                    filter_input(INPUT_GET, 'public_key'),
+                    filter_input(INPUT_GET, 'signature'),
+                    filter_input(INPUT_GET, 'version')
+                );
             }
 
-            exit;
+            if ($_GET['trezor_action'] == 'link') {
+                $psw = filter_input(INPUT_POST, 'psw');
+                $userdata = wp_get_current_user();
+
+                if (wp_check_password($psw, $userdata->user_pass, $userdata->ID)) {
+                    $result = $this->save_extra_profile_fields($userdata->ID);
+                    echo(json_encode(array(
+                        'result' => $result ? 'success' : 'error',
+                        'message' => $result ? '' : 'Wrong signature',
+                    )));
+                } else {
+                    echo(json_encode(array(
+                        'result' => 'error',
+                        'message' => 'Wrong password',
+                    )));
+                }
+                exit;
+            }
+
+            if ($_GET['trezor_action'] == 'unlink') {
+                $psw = filter_input(INPUT_POST, 'psw');
+                $userdata = wp_get_current_user();
+
+                if (wp_check_password($psw, $userdata->user_pass, $userdata->ID)) {
+                    update_user_meta($userdata->ID,'trezor_publickey', '');
+                    echo(json_encode(array(
+                        'result' => 'success',
+                    )));
+                } else {
+                    echo(json_encode(array(
+                        'result' => 'error',
+                        'message' => 'Wrong password',
+                    )));
+                }
+
+                exit;
+            }
         }
 
         if (is_admin()) {
